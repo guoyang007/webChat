@@ -1,0 +1,35 @@
+html,body,#root{
+	height: 100%;
+}
+.app-container{
+	display: flex;
+	height:100%;
+	.content-left{
+		flex: 1;
+		background-color: #ccc;
+		width: 100%;
+		.left-top{
+			height:150px;
+			width: 100%;
+			.portraint{
+				width: 30px;
+				height: 30px;
+				background-color: red;
+			}
+		}
+		.left-boby{
+			.items{
+				width: 100%;
+				.item{
+					height:30px;
+					line-height: 30px;
+				}
+			}
+		}
+	}
+	.content-right{
+		flex:6;
+		background-color:#263238;
+	}
+}
+
