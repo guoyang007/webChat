@@ -1,5 +1,6 @@
 import React,{Component} from 'react'
 import {observer,inject} from 'mobx-react';
+
 require('./index.less') 
 // import GridArticle from '../../components/grid-article/index.js'
 const io=require('../../../node_modules/socket.io-client/socket.io.js')();
@@ -12,15 +13,20 @@ class Layout extends Component{
 		super(props);
 		this.state={
 			text:'',
+			nums:1,
 			lists:[]
 		}
 	}
 
 	componentDidMount(){
 		let that=this;
+		
 		io.on('ChatMessage',function(event){
-			let curList = that.state.lists;
-			curList.push(event.msg)
+			let curList = JSON.parse(JSON.stringify(that.state.lists));
+			curList.push({
+				id:event.id,
+				msg:event.msg
+			})
 			that.setState({
 				lists:curList
 			})
@@ -28,12 +34,30 @@ class Layout extends Component{
 		io.on('join',function(event){
 			console.log('id',event.id)
 			console.log('current connections',event.connectionNum)
+			that.setState({
+				nums:event.connectionNum
+			});
 		})
 		io.on('leave',function(e){
 			console.log('id',e.id);
 			console.log('current connections',e.connectionNum)
+			that.setState({
+				nums:e.connectionNum
+			});
 		})
 	}
+
+	componentDidUpdate(prevProps, prevState){
+		if (prevState.lists.length!=this.state.lists.length) {
+			if (this.el) {
+				this.scrollToBottom();
+			}
+		}
+	}
+
+	scrollToBottom() {
+    this.el.scrollIntoView({ behaviour: 'smooth' });
+  }
 
 	handleChange(e){
 		this.setState({
@@ -55,7 +79,6 @@ class Layout extends Component{
 	render(){
 		let {getIndexData}=this.props.indexStore;
 		let {history}=this.props.routing;
-
 		// let Lists=()=>{
 		// 	let arr=[]
 		// 	this.state.lists.map((item,index)=>{
@@ -84,13 +107,15 @@ class Layout extends Component{
 				</div>
 				<div className="content-right">
 					<div className="room">
-						<span>ROOM NAME(num)</span>
+						<span>ROOM NAME ({this.state.nums})</span>
 					</div>
-					<ul className="msg-list">{this.state.lists.map((item,index)=>(
-						<li key={index} className="item">
-							<span className="text">{item}</span>
-						</li>
-					))}</ul>
+					<div className="msg-list">
+					{this.state.lists.map((item,index)=>(
+						<div key={index} className="item" ref={index==this.state.lists.length-1? el => this.el = el :null}>
+							<span className="name">{item.id.substring(item.id.length-6)}</span>
+							<span className="text">{item.msg}</span>
+						</div>
+					))}</div>
 					<form className="msg-input" action="#">
 						<input value={this.state.text} onChange={this.handleChange.bind(this)} type="text"/>
 						<button onClick={this.handleClick.bind(this)}>Send</button>

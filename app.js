@@ -50,7 +50,6 @@ app.io.on('connection',(ctx,data) => {
 	})
 })
 app.io.on('disconnect',(ctx)=>{
-	console.log('ctx',ctx)
 	console.log('leave',ctx.socket.id)
 	console.log('data',io.connections);
 	app.io.broadcast('leave',{
@@ -59,12 +58,13 @@ app.io.on('disconnect',(ctx)=>{
 	})
 })
 app.io.on('ChatMessage',(ctx,data)=>{
+
 	console.log('ChatMessage',data)
 	app.io.broadcast('ChatMessage',{
+		id:ctx.socket.id,
 		msg:data
 	})
 })
-
 if (!module.parent) {
     app.listen(3000);
     console.log('listening on port 3000');
